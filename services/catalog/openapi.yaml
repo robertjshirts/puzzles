@@ -1,0 +1,181 @@
+openapi: "3.1.0"
+
+info:
+  version: "0.0.1"
+  title: "Puzzle Catalog Service"
+
+paths:
+  /catalog:
+    get:
+      summary: "Get all puzzles"
+      operationId: "getPuzzles"
+      responses:
+        "200":
+          description: "A list of puzzles"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/PuzzleList"
+    post:
+      summary: "Add a new puzzle"
+      operationId: "addPuzzle"
+      requestBody:
+        $ref: "#/components/requestBodies/NewPuzzle"
+      responses:
+        "201":
+          description: "The puzzle was added"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Puzzle"
+        default:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /catalog/{id}:
+    get:
+      summary: "Get a puzzle by ID"
+      operationId: "getPuzzle"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          description: "The ID of the puzzle to retrieve"
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "The puzzle"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Puzzle"
+        default:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: "Delete a puzzle by ID"
+      operationId: "deletePuzzle"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          description: "The ID of the puzzle to delete"
+          schema:
+            type: "string"
+      responses:
+        "204":
+          description: "The puzzle was deleted"
+        default:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      summary: "Update a puzzle by ID"
+      operationId: "updatePuzzle"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          description: "The ID of the puzzle to update"
+          schema:
+            type: "string"
+      requestBody:
+        $ref: "#/components/requestBodies/NewPuzzle"
+      responses:
+        "200":
+          description: "The puzzle was updated"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Puzzle"
+        default:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  requestBodies:
+    NewPuzzle:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/NewPuzzle"
+  schemas:
+    PuzzleType:
+      type: string
+      enum:
+        - "2x2"
+        - "3x3"
+        - "4x4"
+        - "5x5"
+        - "6x6"
+        - "7x7"
+        - "8x8+"
+        - "pyraminx"
+        - "megaminx"
+        - "skewb"
+        - "square-1"
+        - "clock"
+        - "other"
+    NewPuzzle:
+      required:
+        - name
+        - type
+        - description
+        - price
+        - quantity
+      properties:
+        name:
+          type: string
+          description: "The name of the puzzle"
+        type:
+          $ref: "#/components/schemas/PuzzleType"
+        description:
+          type: string
+          description: "A description of the puzzle"
+        price:
+          type: number
+          description: "The price of the puzzle"
+        quantity:
+          type: integer
+          description: "The number of puzzles available"
+    Puzzle:
+      allOf:
+        - $ref: "#/components/schemas/NewPuzzle"
+        - required:
+            # Look at this https://github.com/deepmap/oapi-codegen?tab=readme-ov-file#extensions
+            - id
+          properties:
+            id:
+              type: string
+              description: "The unique identifier for a puzzle (UUID)"
+    PuzzleList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Puzzle"
+      description: "The type of puzzle"
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+          description: "A code representing the error"
+        message:
+          type: string
+          description: "A message describing the error"

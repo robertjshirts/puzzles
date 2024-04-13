@@ -1,0 +1,18 @@
+version: 3.0.0
+
+name: puzzles
+
+services:
+  mongo:
+    image: mongo:7.0.8
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - /dev/volumes/puzzles:/data/db
+    networks:
+      - puzzlenet
+
+networks:
+  puzzlenet:
+    driver: bridge
