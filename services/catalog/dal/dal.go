@@ -6,6 +6,7 @@ import (
 
 	"github.com/puzzles/services/catalog/gen"
 
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -53,17 +54,18 @@ func (dal *MongoDAL) GetPuzzle(ctx context.Context, id string) (*gen.Puzzle, err
 
 func (dal *MongoDAL) AddPuzzle(ctx context.Context, puzzle gen.NewPuzzle) (*gen.Puzzle, error) {
 	collection := dal.db.Collection("puzzles")
-	res, err := collection.InsertOne(ctx, puzzle)
-	if err != nil {
-		return nil, err
-	}
+	id := uuid.New().String()
 	newPuzzle := gen.Puzzle{
-		Id:          res.InsertedID.(string),
+		Id:          id,
 		Name:        puzzle.Name,
 		Description: puzzle.Description,
 		Price:       puzzle.Price,
 		Quantity:    puzzle.Quantity,
 		Type:        puzzle.Type,
+	}
+	_, err := collection.InsertOne(ctx, newPuzzle)
+	if err != nil {
+		return nil, err
 	}
 	return &newPuzzle, nil
 }
