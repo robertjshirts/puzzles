@@ -144,19 +144,28 @@ components:
         name:
           type: string
           description: "The name of the puzzle"
-        type:
-          $ref: "#/components/schemas/PuzzleType"
+          x-oapi-codegen-extra-tags:
+            bson: name,omitempty
         description:
           type: string
           description: "A description of the puzzle"
+          x-oapi-codegen-extra-tags:
+            bson: description,omitempty
         price:
           type: number
           minimum: 0
+          maximum: 10000
+          multipleOf: 0.01
           description: "The price of the puzzle"
+          x-go-type: float64
+          x-oapi-codegen-extra-tags:
+            bson: price,omitempty
         quantity:
           type: integer
           minimum: 0
           description: "The number of puzzles available"
+          x-oapi-codegen-extra-tags:
+            bson: quantity,omitempty
     NewPuzzle:
       type: object
       description: "A new puzzle"
@@ -172,7 +181,10 @@ components:
         price:
           type: number
           minimum: 0
+          maximum: 10000
+          multipleOf: 0.01
           description: "The price of the puzzle"
+          x-go-type: float64
         quantity:
           type: integer
           minimum: 0

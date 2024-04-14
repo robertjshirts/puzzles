@@ -25,13 +25,14 @@ func (h *CatalogHandler) GetPuzzles(c *gin.Context) {
 
 func (h *CatalogHandler) AddPuzzle(c *gin.Context) {
 	var newPuzzle gen.NewPuzzle
-	if err := c.BindJSON(&newPuzzle); err != nil {
+	err := c.BindJSON(&newPuzzle)
+	if err != nil {
 		c.JSON(400, gen.Error{Code: 400, Message: err.Error()})
 	}
 
-	puzzle, err := h.db.AddPuzzle(c, newPuzzle)
-	if err != nil {
-		c.JSON(int(err.Code), err)
+	puzzle, genErr := h.db.AddPuzzle(c, newPuzzle)
+	if genErr != nil {
+		c.JSON(int(genErr.Code), err)
 	}
 	c.JSON(201, puzzle)
 }

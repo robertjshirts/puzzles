@@ -50,7 +50,7 @@ type NewPuzzle struct {
 	Name string `json:"name"`
 
 	// Price The price of the puzzle
-	Price float32 `json:"price"`
+	Price float64 `json:"price"`
 
 	// Quantity The number of puzzles available
 	Quantity int `json:"quantity"`
@@ -71,7 +71,7 @@ type Puzzle struct {
 	Name string `json:"name"`
 
 	// Price The price of the puzzle
-	Price float32 `json:"price"`
+	Price float64 `json:"price"`
 
 	// Quantity The number of puzzles available
 	Quantity int `json:"quantity"`
@@ -89,19 +89,16 @@ type PuzzleType string
 // PuzzleUpdate An update to a puzzle
 type PuzzleUpdate struct {
 	// Description A description of the puzzle
-	Description *string `json:"description,omitempty"`
+	Description *string `bson:"description,omitempty" json:"description,omitempty"`
 
 	// Name The name of the puzzle
-	Name *string `json:"name,omitempty"`
+	Name *string `bson:"name,omitempty" json:"name,omitempty"`
 
 	// Price The price of the puzzle
-	Price *float32 `json:"price,omitempty"`
+	Price *float64 `bson:"price,omitempty" json:"price,omitempty"`
 
 	// Quantity The number of puzzles available
-	Quantity *int `json:"quantity,omitempty"`
-
-	// Type The type of puzzle
-	Type *PuzzleType `json:"type,omitempty"`
+	Quantity *int `bson:"quantity,omitempty" json:"quantity,omitempty"`
 }
 
 // AddPuzzleJSONRequestBody defines body for AddPuzzle for application/json ContentType.
@@ -113,21 +110,23 @@ type UpdatePuzzleJSONRequestBody = PuzzleUpdate
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"zyAtmqb5JwAA//+y6zx2HxEAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
