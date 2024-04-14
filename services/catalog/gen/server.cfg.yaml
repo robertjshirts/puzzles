@@ -1,4 +1,5 @@
-package: "api"
+package: gen
 generate:
   gin-server: true
-output: catalog-server.gen.go
+# Send to gen folder
+output: ./gen/catalog-server.gen.go

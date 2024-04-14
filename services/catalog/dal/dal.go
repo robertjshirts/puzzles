@@ -30,29 +30,29 @@ func NewMongoDAL(uri, dbName string) *MongoDAL {
 	}
 }
 
-func (dal *MongoDAL) GetAllPuzzles(ctx context.Context) ([]gen.Puzzle, error) {
+func (dal *MongoDAL) GetAllPuzzles(ctx context.Context) ([]gen.Puzzle, *gen.Error) {
 	var puzzles []gen.Puzzle
 	collection := dal.db.Collection("puzzles")
 	cursor, err := collection.Find(ctx, bson.D{})
 	if err != nil {
-		return nil, err
+		return nil, &gen.Error{Code: 500, Message: err.Error()}
 	}
 	if err = cursor.All(ctx, &puzzles); err != nil {
-		return nil, err
+		return nil, &gen.Error{Code: 500, Message: err.Error()}
 	}
 	return puzzles, nil
 }
 
-func (dal *MongoDAL) GetPuzzle(ctx context.Context, id string) (*gen.Puzzle, error) {
+func (dal *MongoDAL) GetPuzzle(ctx context.Context, id string) (*gen.Puzzle, *gen.Error) {
 	var puzzle gen.Puzzle
 	collection := dal.db.Collection("puzzles")
 	if err := collection.FindOne(ctx, bson.M{"id": id}).Decode(&puzzle); err != nil {
-		return nil, err
+		return nil, &gen.Error{Code: 404, Message: "Puzzle not found"}
 	}
 	return &puzzle, nil
 }
 
-func (dal *MongoDAL) AddPuzzle(ctx context.Context, puzzle gen.NewPuzzle) (*gen.Puzzle, error) {
+func (dal *MongoDAL) AddPuzzle(ctx context.Context, puzzle gen.NewPuzzle) (*gen.Puzzle, *gen.Error) {
 	collection := dal.db.Collection("puzzles")
 	id := uuid.New().String()
 	newPuzzle := gen.Puzzle{
@@ -63,32 +63,32 @@ func (dal *MongoDAL) AddPuzzle(ctx context.Context, puzzle gen.NewPuzzle) (*gen.
 		Quantity:    puzzle.Quantity,
 		Type:        puzzle.Type,
 	}
+	// Ignore result from insert operation, we don't need it
 	_, err := collection.InsertOne(ctx, newPuzzle)
 	if err != nil {
-		return nil, err
+		return nil, &gen.Error{Code: 500, Message: err.Error()}
 	}
 	return &newPuzzle, nil
 }
 
-func (dal *MongoDAL) UpdatePuzzle(ctx context.Context, id string, puzzle gen.NewPuzzle) (*gen.Puzzle, error) {
+func (dal *MongoDAL) UpdatePuzzle(ctx context.Context, id string, updates gen.PuzzleUpdate) *gen.Error {
 	collection := dal.db.Collection("puzzles")
-	_, err := collection.UpdateOne(ctx, bson.M{"id": id}, bson.D{{"$set", puzzle}})
+	result, err := collection.UpdateOne(ctx, bson.M{"id": id}, bson.D{{Key: "$set", Value: updates}})
 	if err != nil {
-		return nil, err
+		return &gen.Error{Code: 500, Message: err.Error()}
 	}
-	updatedPuzzle := gen.Puzzle{
-		Id:          id,
-		Name:        puzzle.Name,
-		Description: puzzle.Description,
-		Price:       puzzle.Price,
-		Quantity:    puzzle.Quantity,
-		Type:        puzzle.Type,
+	if result.MatchedCount == 0 {
+		return &gen.Error{Code: 404, Message: "Puzzle not found"}
 	}
-	return &updatedPuzzle, nil
+	return nil
 }
 
-func (dal *MongoDAL) DeletePuzzle(ctx context.Context, id string) error {
+func (dal *MongoDAL) DeletePuzzle(ctx context.Context, id string) *gen.Error {
 	collection := dal.db.Collection("puzzles")
+	// Ignore result from delete operation, we don't need it
 	_, err := collection.DeleteOne(ctx, bson.M{"id": id})
-	return err
+	if err != nil {
+		return &gen.Error{Code: 500, Message: err.Error()}
+	}
+	return nil
 }

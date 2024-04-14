@@ -1,7 +1,7 @@
-package: api
+package: gen
 generate:
   models: true
   embedded-spec: true
-output: catalog-types.gen.go
+output: ./gen/catalog-types.gen.go # Send to gen folder
 output-options:
   skip-prune: true

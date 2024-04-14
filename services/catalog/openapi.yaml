@@ -90,7 +90,7 @@ paths:
           schema:
             type: "string"
       requestBody:
-        $ref: "#/components/requestBodies/NewPuzzle"
+        $ref: "#/components/requestBodies/PuzzleUpdate"
       responses:
         "200":
           description: "The puzzle was updated"
@@ -113,16 +113,16 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/NewPuzzle"
+    PuzzleUpdate:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/PuzzleUpdate"
   schemas:
-    Something:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type: string
     PuzzleType:
       type: string
+      description: "The type of puzzle"
       enum:
         - "2x2"
         - "3x3"
@@ -137,13 +137,9 @@ components:
         - "square-1"
         - "clock"
         - "other"
-    NewPuzzle:
-      required:
-        - name
-        - type
-        - description
-        - price
-        - quantity
+    PuzzleUpdate:
+      type: object
+      description: "An update to a puzzle"
       properties:
         name:
           type: string
@@ -155,26 +151,57 @@ components:
           description: "A description of the puzzle"
         price:
           type: number
+          minimum: 0
           description: "The price of the puzzle"
         quantity:
           type: integer
+          minimum: 0
           description: "The number of puzzles available"
+    NewPuzzle:
+      type: object
+      description: "A new puzzle"
+      properties:
+        name:
+          type: string
+          description: "The name of the puzzle"
+        type:
+          $ref: "#/components/schemas/PuzzleType"
+        description:
+          type: string
+          description: "A description of the puzzle"
+        price:
+          type: number
+          minimum: 0
+          description: "The price of the puzzle"
+        quantity:
+          type: integer
+          minimum: 0
+          description: "The number of puzzles available"
+      required:
+        - name
+        - type
+        - description
+        - price
+        - quantity
     Puzzle:
       allOf:
         - $ref: "#/components/schemas/NewPuzzle"
         - required:
-            # Look at this https://github.com/deepmap/oapi-codegen?tab=readme-ov-file#extensions
             - id
-          properties:
+        - properties:
             id:
               type: string
-              description: "The unique identifier for a puzzle (UUID)"
+              description: "The ID of the puzzle"
+      type: object
+      description: "A puzzle"
     PuzzleList:
       type: array
+      description: "A list of puzzles"
       items:
         $ref: "#/components/schemas/Puzzle"
-      description: "The type of puzzle"
     Error:
+      type: object
+      description: "An error response"
       required:
         - code
         - message
