@@ -68,3 +68,12 @@ func (d *RedisDal) SetBasket(ctx context.Context, id string, basket *gen.Basket)
 
 	return nil
 }
+
+func (d *RedisDal) DeleteBasket(ctx context.Context, id string) *gen.Error {
+	err := d.client.Del(ctx, id).Err()
+	if err != nil {
+		return &gen.Error{Code: 500, Message: err.Error()}
+	}
+
+	return nil
+}

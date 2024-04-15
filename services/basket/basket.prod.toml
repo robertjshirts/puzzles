@@ -1,0 +1,7 @@
+port = 8081
+
+[redis]
+host = "redis"
+password = ""
+port = 6379
+duration = "30m"

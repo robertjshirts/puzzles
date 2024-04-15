@@ -29,6 +29,18 @@ services:
       - "6379:6379"
     networks:
       - puzzlenet
+  basket:
+    build: ./services/basket
+    container_name: basket
+    environment:
+      - ENV=prod
+    ports:
+      - "8081:8081"
+    image: puzzles-basket
+    depends_on:
+      - redis
+    networks:
+      - puzzlenet
 
 
 networks:
