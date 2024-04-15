@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"fmt"
 	"log"
 	"time"
 
@@ -17,9 +18,9 @@ type RedisDal struct {
 	expiration time.Duration
 }
 
-func NewRedisDal(ctx context.Context, addr string, password string, expiration time.Duration) *RedisDal {
+func NewRedisDal(ctx context.Context, host string, port string, password string, expiration time.Duration) *RedisDal {
 	client := redis.NewClient(&redis.Options{
-		Addr:     addr,
+		Addr:     fmt.Sprintf("%s:%s", host, port),
 		Password: password,
 		DB:       0,
 	})

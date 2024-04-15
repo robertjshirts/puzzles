@@ -1,0 +1,217 @@
+openapi: "3.1.0"
+
+info:
+  version: "0.0.1"
+  title: "Puzzle Cart Service"
+
+paths:
+  /order:
+    post:
+      summary: "Place a new order"
+      operationId: "createNewOrder"
+      requestBody:
+        description: "The items to add to the cart"
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewOrderInfo"
+      responses:
+        "201":
+          description: "The cart was created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderInfo"
+        default:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /order/{id}:
+    get:
+      summary: "Get order details by ID"
+      operationId: "getOrder"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          description: "The ID of the order to retrieve"
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "The order"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderInfo"
+        default:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: "Delete an order by ID"
+      operationId: "deleteOrder"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          description: "The ID of the order to delete"
+          schema:
+            type: "string"
+      responses:
+        "204":
+          description: "The order was deleted"
+        default:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    PuzzleType:
+      type: string
+      description: "The type of puzzle"
+      enum:
+        - "2x2"
+        - "3x3"
+        - "4x4"
+        - "5x5"
+        - "6x6"
+        - "7x7"
+        - "8x8+"
+        - "pyraminx"
+        - "megaminx"
+        - "skewb"
+        - "square-1"
+        - "clock"
+        - "other"
+    Puzzle:
+      type: object
+      description: "A puzzle"
+      properties:
+        id:
+          type: string
+          description: "The ID of the puzzle"
+        name:
+          type: string
+          description: "The name of the puzzle"
+        type:
+          $ref: "#/components/schemas/PuzzleType"
+        description:
+          type: string
+          description: "A description of the puzzle"
+        price:
+          type: number
+          minimum: 0
+          maximum: 10000
+          multipleOf: 0.01
+          description: "The price of the puzzle"
+          x-go-type: float64
+      required:
+        - id
+        - name
+        - type
+        - description
+        - price
+
+    ShippingInfo:
+      type: object
+      description: "The shipping information"
+      properties:
+        name:
+          type: string
+          description: "The name of the recipient"
+        address:
+          type: string
+          description: "The address of the recipient"
+        areaCode:
+          type: string
+          description: "The area code of the recipient"
+        city:
+          type: string
+          description: "The city of the recipient"
+        state:
+          type: string
+          description: "The state of the recipient"
+        country:
+          type: string
+          description: "The country of the recipient"
+      required:
+        - name
+        - address
+        - areaCode
+        - city
+        - state
+        - country
+    PaymentInfo:
+      type: object
+      description: "The payment information"
+      properties:
+        cardNumber:
+          type: string
+          description: "The card number"
+        date:
+          type: string
+          description: "The expiration date"
+        cvv:
+          type: string
+          description: "The CVV"
+        areaCode:
+          type: string
+          description: "The area code of the card owner"
+      required:
+        - cardNumber
+        - expirationDate
+        - cvv
+        - areaCode
+    NewOrderInfo:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Puzzle"
+        name:
+          type: string
+          description: "The name of the customer"
+        address:
+          type: string
+          description: "The address of the customer"
+        shippingInfo:
+          $ref: "#/components/schemas/ShippingInfo"
+        paymentInfo:
+          $ref: "#/components/schemas/PaymentInfo"
+      required:
+        - items
+        - name
+        - address
+        - shippingInfo
+        - paymentInfo
+    OrderInfo:
+      allOf:
+        - $ref: "#/components/schemas/NewOrderInfo"
+        - properties:
+            id:
+              type: string
+              description: "The ID of the order"
+        - required:
+            - id
+      type: object
+      description: "The order information"
+
+    Error:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+        message:
+          type: "string"
+      required:
+        - code
+        - message

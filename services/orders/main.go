@@ -8,23 +8,20 @@ import (
 	"os"
 	"time"
 
+	"github.com/puzzles/services/basket/dal"
+	"github.com/puzzles/services/basket/gen"
+	"github.com/puzzles/services/basket/handler"
 	"github.com/spf13/viper"
 
 	"github.com/gin-gonic/gin"
 	middleware "github.com/oapi-codegen/gin-middleware"
-
-	"github.com/puzzles/services/basket/dal"
-	"github.com/puzzles/services/basket/gen"
-	"github.com/puzzles/services/basket/handler"
 )
 
 func main() {
 	env := os.Getenv("ENV")
 	if env == "" {
-		env = "prod"
+		env = "dev"
 	}
-
-	fmt.Printf("Connecting to redis on: %s", viper.GetString("redis.host"))
 
 	viper.SetConfigFile(fmt.Sprintf("basket.%s.toml", env))
 	viper.SetConfigType("toml")
@@ -38,8 +35,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	db := dal.NewRedisDal(ctx,
-		viper.GetString("redis.host"),
-		viper.GetString("redis.port"),
+		viper.GetString("redis.addr"),
 		viper.GetString("redis.password"),
 		viper.GetDuration("redis.duration"),
 	)
