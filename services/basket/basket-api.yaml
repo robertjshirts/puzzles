@@ -1,0 +1,208 @@
+openapi: "3.1.0"
+
+info:
+  version: "0.0.1"
+  title: "Puzzle Catalog Service"
+
+paths:
+  /basket:
+    post:
+      summary: "Create a new basket"
+      operationId: "createNewBasket"
+      requestBody:
+        type: array
+        description: "The items to add to the basket"
+        items:
+          $ref: "#/components/schemas/Puzzle"
+      responses:
+        "201":
+          description: "The basket was created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Basket"
+        default:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /basket/{id}:
+    get:
+      summary: "Get a basket by ID"
+      operationId: "getBasket"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          description: "The ID of the basket to retrieve"
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "The basket"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Basket"
+        default:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      summary: "Add items to a basket"
+      operationId: "addItemToBasket"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          description: "The ID of the basket to add items to"
+          schema:
+            type: "string"
+      requestBody:
+        type: array
+        description: "The items to add to the basket"
+        items:
+          $ref: "#/components/schemas/Puzzle"
+      responses:
+        "201":
+          description: "The basket was created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Basket"
+        default:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: "Delete a basket by ID"
+      operationId: "deleteBasket"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          description: "The ID of the basket to delete"
+          schema:
+            type: "string"
+      responses:
+        "204":
+          description: "The basket was deleted"
+        default:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /basket/{id}/{puzzleId}:
+    delete:
+      summary: "Remove a puzzle from a basket"
+      operationId: "removePuzzleFromBasket"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          description: "The ID of the basket"
+          schema:
+            type: "string"
+        - name: "puzzleId"
+          in: "path"
+          required: true
+          description: "The ID of the puzzle to remove"
+          schema:
+            type: "string"
+      responses:
+        "204":
+          description: "The puzzle was removed from the basket"
+        default:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    Basket:
+      type: object
+      description: "A basket"
+      properties:
+        id:
+          type: string
+          description: "The ID of the basket"
+        items:
+          type: array
+          description: "The items in the basket"
+          items:
+            $ref: "#/components/schemas/Puzzle"
+      required:
+        - id
+        - items
+    PuzzleType:
+      type: string
+      description: "The type of puzzle"
+      enum:
+        - "2x2"
+        - "3x3"
+        - "4x4"
+        - "5x5"
+        - "6x6"
+        - "7x7"
+        - "8x8+"
+        - "pyraminx"
+        - "megaminx"
+        - "skewb"
+        - "square-1"
+        - "clock"
+        - "other"
+    Puzzle:
+      type: object
+      properties:
+        id:
+          type: string
+          description: "The ID of the puzzle"
+        name:
+          type: string
+          description: "The name of the puzzle"
+        type:
+          $ref: "#/components/schemas/PuzzleType"
+        description:
+          type: string
+          description: "A description of the puzzle"
+        price:
+          type: number
+          minimum: 0
+          maximum: 10000
+          multipleOf: 0.01
+          description: "The price of the puzzle"
+          x-go-type: float64
+        quantity:
+          type: integer
+          minimum: 0
+          description: "The number of puzzles added to the basket"
+      required:
+        - id
+        - name
+        - type
+        - description
+        - price
+        - quantity
+
+    Error:
+      type: object
+      description: "An error response"
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+          description: "A code representing the error"
+        message:
+          type: string
+          description: "A message describing the error"

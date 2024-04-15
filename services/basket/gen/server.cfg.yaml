@@ -1,0 +1,5 @@
+package: gen
+generate:
+  gin-server: true
+# Send to gen folder
+output: ./gen/catalog-server.gen.go
