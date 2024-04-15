@@ -1,7 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"net/http"
+	"os"
 
 	"github.com/spf13/viper"
 
@@ -14,7 +17,11 @@ import (
 )
 
 func main() {
-	viper.SetConfigName("catalog")
+	env := os.Getenv("ENV")
+	if env == "" {
+		env = "dev"
+	}
+	viper.SetConfigFile(fmt.Sprintf("catalog.%s.toml", env))
 	viper.AddConfigPath(".")
 	viper.SetConfigType("toml")
 	viper.SetEnvPrefix("puzzles")
@@ -23,6 +30,8 @@ func main() {
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatal(err)
 	}
+
+	fmt.Printf("conn: %s\n", viper.GetString("mongo.uri"))
 
 	db := dal.NewMongoDAL(
 		viper.GetString("mongo.uri"),
@@ -41,5 +50,5 @@ func main() {
 	router.Use(middleware.OapiRequestValidator(swagger))
 	gen.RegisterHandlers(router, handler)
 
-	router.Run()
+	http.ListenAndServe(fmt.Sprintf(":%d", viper.GetInt("port")), router)
 }
