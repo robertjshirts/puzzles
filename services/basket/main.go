@@ -21,7 +21,7 @@ import (
 func main() {
 	env := os.Getenv("ENV")
 	if env == "" {
-		env = "prod"
+		env = "dev"
 	}
 
 	fmt.Printf("Connecting to redis on: %s", viper.GetString("redis.host"))
