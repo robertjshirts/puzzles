@@ -1,4 +1,4 @@
-version: 3.0.0
+version: "3.8"
 
 name: puzzles
 
@@ -6,12 +6,23 @@ services:
   mongo:
     image: mongo:7.0.8
     container_name: mongo
-    ports:
-      - "27017:27017"
     volumes:
       - /dev/volumes/puzzles:/data/db
     networks:
       - puzzlenet
+  catalog:
+    build: ./services/catalog
+    container_name: catalog
+    environment:
+      - ENV=prod
+    ports:
+      - "8080:8080"
+    image: puzzles-catalog
+    depends_on:
+      - mongo
+    networks:
+      - puzzlenet
+
 
 networks:
   puzzlenet:
