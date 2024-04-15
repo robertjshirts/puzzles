@@ -10,10 +10,13 @@ paths:
       summary: "Create a new basket"
       operationId: "createNewBasket"
       requestBody:
-        type: array
         description: "The items to add to the basket"
-        items:
-          $ref: "#/components/schemas/Puzzle"
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/Puzzle"
       responses:
         "201":
           description: "The basket was created"
@@ -62,10 +65,13 @@ paths:
           schema:
             type: "string"
       requestBody:
-        type: array
         description: "The items to add to the basket"
-        items:
-          $ref: "#/components/schemas/Puzzle"
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/Puzzle"
       responses:
         "201":
           description: "The basket was created"
@@ -180,17 +186,12 @@ components:
           multipleOf: 0.01
           description: "The price of the puzzle"
           x-go-type: float64
-        quantity:
-          type: integer
-          minimum: 0
-          description: "The number of puzzles added to the basket"
       required:
         - id
         - name
         - type
         - description
         - price
-        - quantity
 
     Error:
       type: object

@@ -1,16 +1,19 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/spf13/viper"
 
 	"github.com/gin-gonic/gin"
 	middleware "github.com/oapi-codegen/gin-middleware"
 
+	"github.com/puzzles/services/basket/dal"
 	"github.com/puzzles/services/basket/gen"
 	"github.com/puzzles/services/basket/handler"
 )
@@ -30,7 +33,17 @@ func main() {
 		log.Fatal(err)
 	}
 
-	handler := handler.NewBasketHandler()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	db := dal.NewRedisDal(ctx,
+		viper.GetString("redis.addr"),
+		viper.GetString("redis.password"),
+		viper.GetDuration("redis.duration"),
+	)
+
+	handler := handler.NewBasketHandler(
+		db,
+	)
 
 	swagger, err := gen.GetSwagger()
 	if err != nil {
@@ -43,5 +56,4 @@ func main() {
 	gen.RegisterHandlers(router, handler)
 
 	http.ListenAndServe(fmt.Sprintf(":%d", viper.GetInt("port")), router)
-
 }

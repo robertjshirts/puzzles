@@ -64,9 +64,6 @@ type Puzzle struct {
 	// Price The price of the puzzle
 	Price float64 `json:"price"`
 
-	// Quantity The number of puzzles added to the basket
-	Quantity int `json:"quantity"`
-
 	// Type The type of puzzle
 	Type PuzzleType `json:"type"`
 }
@@ -74,24 +71,36 @@ type Puzzle struct {
 // PuzzleType The type of puzzle
 type PuzzleType string
 
+// CreateNewBasketJSONBody defines parameters for CreateNewBasket.
+type CreateNewBasketJSONBody = []Puzzle
+
+// AddItemToBasketJSONBody defines parameters for AddItemToBasket.
+type AddItemToBasketJSONBody = []Puzzle
+
+// CreateNewBasketJSONRequestBody defines body for CreateNewBasket for application/json ContentType.
+type CreateNewBasketJSONRequestBody = CreateNewBasketJSONBody
+
+// AddItemToBasketJSONRequestBody defines body for AddItemToBasket for application/json ContentType.
+type AddItemToBasketJSONRequestBody = AddItemToBasketJSONBody
+
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"H4sIAAAAAAAC/+xWTXPbNhD9K5htb4UlynacDG923GZ0aTutb54cIHIlISY+AoA2FY3+e2cBkpIlKnFr",
+	"p+PO9EQKwC7e7nv7xDUURlmjUQcP+Rp8sUQl4uuV8HcY6K1EXzhpgzQacrhks7TDwTpj0QWJMUCWh4dv",
+	"lsim18zMWVjiNjCsLEIOPjipF7DhIAMqPxwet5jUjzP0AT86nEMOP4y3hYzbKsa/11++VEj52wuFc2IF",
+	"mw0Hh59r6bCE/JaAdwk/9kfN7BMWgWJ/ds64gT5ohrTDHHprtMeDhhSmxKH+0TpzaB161EHqRSwtJgMO",
+	"c+OUCJCD1OHsdNssqQMu0BEihd6LxWDudoul9dl+8r3G7zUiAt6mH2pG29J8vVfrIxyHsHZ+d2KwKdOQ",
+	"GL4ppOOxWigcjqadb8dbJ4sjCeLWQQYlGqlqBfkky7KMg5I6/ab3ugrSVvjbHPJslE36+3StZkh8NCcL",
+	"c9IuzisjwsX5Vq5PEfcNnRwUdOxEm4o/Kqer8ji/N+39h02gAOpBXz9qKvYWThvS6llzBhzOm3Pg8KZ5",
+	"Axwumgvg8LZ5CxzeNe9+ottXTiipmyi1Rffq7/BhRs/PtXB4MgEORWWKO+BgwhLdDtxeviQWPTcENchA",
+	"umwLYO9FEJVZsD/R3VOtHO7R+VRHNspGEyrWWNTCSsjhbDQZZQRNhGXU83jW2581Pj5J7oJaMS0hh/cO",
+	"RcBf8eGqsyRiAH24MuUqTb8OqGOksLaSRYwdf/JpQhKN0TefZWUbftQzg2GiLOmxY51RKsmw4qWn2eRv",
+	"of0ayLYVR0AlAOxBeFbE5pUQz81FXYUXw5DcegBC79emKGpHk0JnfK2UcKueUCaYxoe+WRveKWG8luUm",
+	"zUSFAQ8FcR3XezVY4YTCgM5DfvuUv0Xiqc1NqoY8irEb5DwN9XbKg6uR7/RkfzQ+HvB8PjzRO7Sk618X",
+	"LamtTHQ4Zys2vSaECxyYyg8YnseAw+Ak3n8vDrJ/ddZeFZEfMAywOGyul2U5DahuzPPIJPfrrPDlCP3f",
+	"5f/DLn+5I4lejgc+P16n75vp1y3/D1TmHhNpvzij/rlaX0Sd/CkfzcnkCPfwnV3h3+fPpsVA6kggSjZ3",
+	"Ru1J99WoJRHMRIc7Yt1RzWbzVwAAAP//t5K8qUEPAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

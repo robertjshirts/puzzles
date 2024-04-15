@@ -1,1 +1,7 @@
 port = 8080
+
+[redis]
+host = "localhost"
+password = ""
+port = 6379
+duration = "3h"
