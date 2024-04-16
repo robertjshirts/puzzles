@@ -1,4 +1,4 @@
-openapi: "3.1.0"
+openapi: "3.0.3"
 
 info:
   version: "0.0.1"
@@ -167,7 +167,7 @@ components:
           description: "The area code of the card owner"
       required:
         - cardNumber
-        - expirationDate
+        - date
         - cvv
         - areaCode
     NewOrderInfo:
@@ -180,9 +180,6 @@ components:
         name:
           type: string
           description: "The name of the customer"
-        address:
-          type: string
-          description: "The address of the customer"
         shippingInfo:
           $ref: "#/components/schemas/ShippingInfo"
         paymentInfo:
@@ -190,9 +187,14 @@ components:
       required:
         - items
         - name
-        - address
         - shippingInfo
         - paymentInfo
+    OrderStatus:
+      type: string
+      description: "The status of the order"
+      enum:
+        - "placed"
+        - "cancelled"
     OrderInfo:
       allOf:
         - $ref: "#/components/schemas/NewOrderInfo"
@@ -200,8 +202,11 @@ components:
             id:
               type: string
               description: "The ID of the order"
+            status:
+              $ref: "#/components/schemas/OrderStatus"
         - required:
             - id
+            - status
       type: object
       description: "The order information"
 
