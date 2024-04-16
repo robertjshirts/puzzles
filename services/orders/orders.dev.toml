@@ -1,1 +1,9 @@
 port = 8082
+
+[postgres]
+host = "localhost"
+port = 5432
+user = "puzzles"
+password = "puzzles"
+dbname = "puzzles"
+timeout = "15s"

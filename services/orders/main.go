@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/puzzles/services/orders/dal"
 	"github.com/puzzles/services/orders/gen"
 	"github.com/puzzles/services/orders/handler"
 )
@@ -29,6 +30,20 @@ func main() {
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatal(err)
 	}
+
+	db, err := dal.NewSQLDal(
+		viper.GetString("postgres.host"),
+		viper.GetInt("postgres.port"),
+		viper.GetString("postgres.user"),
+		viper.GetString("postgres.password"),
+		viper.GetString("postgres.dbname"),
+		viper.GetDuration("postgres.timeout"),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Database: %v\n", db)
 
 	handler := handler.NewOrderHandler()
 

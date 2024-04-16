@@ -7,7 +7,7 @@ services:
     image: mongo:7.0.8
     container_name: mongo
     volumes:
-      - /dev/volumes/puzzles:/data/db
+      - /dev/volumes/puzzles/mongo:/data/db
     networks:
       - puzzlenet
   catalog:
@@ -41,6 +41,20 @@ services:
       - redis
     networks:
       - puzzlenet
+  postgres:
+    image: postgres:16.2
+    container_name: postgres
+    restart: always
+    shm_size: 128mb
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=puzzles
+      - POSTGRES_PASSWORD=puzzles
+      - POSTGRES_DB=puzzles
+    networks: 
+      - puzzlenet
+
 
 
 networks:
