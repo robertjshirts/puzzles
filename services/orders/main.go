@@ -43,9 +43,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Database: %v\n", db)
-
-	handler := handler.NewOrderHandler()
+	handler := handler.NewOrderHandler(db)
 
 	swagger, err := gen.GetSwagger()
 	if err != nil {

@@ -156,7 +156,7 @@ components:
         cardNumber:
           type: string
           description: "The card number"
-        date:
+        expiration:
           type: string
           description: "The expiration date"
         cvv:
@@ -167,19 +167,19 @@ components:
           description: "The area code of the card owner"
       required:
         - cardNumber
-        - date
+        - expiration
         - cvv
         - areaCode
     NewOrderInfo:
       type: object
       properties:
+        name:
+          type: string
+          description: "The name of the customer"
         items:
           type: array
           items:
             $ref: "#/components/schemas/Puzzle"
-        name:
-          type: string
-          description: "The name of the customer"
         shippingInfo:
           $ref: "#/components/schemas/ShippingInfo"
         paymentInfo:

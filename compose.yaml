@@ -54,6 +54,18 @@ services:
       - POSTGRES_DB=puzzles
     networks: 
       - puzzlenet
+  orders:
+    build: ./services/orders
+    container_name: orders
+    environment:
+      - ENV=prod
+    ports:
+      - "8082:8082"
+    image: puzzles-orders
+    depends_on:
+      - postgres
+    networks:
+      - puzzlenet
 
 
 
