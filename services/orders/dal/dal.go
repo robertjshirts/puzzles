@@ -9,6 +9,8 @@ import (
 	_ "github.com/lib/pq"
 
 	"github.com/jmoiron/sqlx"
+
+	"github.com/puzzles/services/orders/gen"
 )
 
 type SQLDal struct {
@@ -60,6 +62,7 @@ CREATE TABLE IF NOT EXISTS order_info (
 CREATE TABLE IF NOT EXISTS puzzles (
 	id TEXT PRIMARY KEY,
 	order_info_id TEXT NOT NULL,
+	name TEXT NOT NULL,
 	description TEXT NOT NULL,
 	price DECIMAL NOT NULL,
 	puzzle_type puzzle_enum NOT NULL,
@@ -97,44 +100,70 @@ func (d *SQLDal) Close() error {
 	return d.db.Close()
 }
 
-func (d *SQLDal) GetOrderInfo(id string) (*OrderInfo, error) {
+func (d *SQLDal) GetOrder(id string) (*OrderInfo, *PaymentInfo, *ShippingInfo, *[]Puzzle, *gen.Error) {
 	var order OrderInfo
-	err := d.db.Get(&order, "SELECT * FROM orders WHERE id = $1", id)
+	err := d.db.Get(&order, "SELECT * FROM order_info WHERE id = $1", id)
 	if err == sql.ErrNoRows {
-		return nil, nil
+		return nil, nil, nil, nil, &gen.Error{Code: 404, Message: "order not found"}
+	} else if err != nil {
+		return nil, nil, nil, nil, &gen.Error{Code: 500, Message: err.Error()}
 	}
-	return &order, err
+
+	var payment PaymentInfo
+	err = d.db.Get(&payment, "SELECT * FROM payment_info WHERE id = $1", order.PaymentInfoId)
+	if err != nil {
+		return nil, nil, nil, nil, &gen.Error{Code: 500, Message: err.Error()}
+	}
+
+	var shipping ShippingInfo
+	err = d.db.Get(&shipping, "SELECT * FROM shipping_info WHERE id = $1", order.ShippingInfoId)
+	if err != nil {
+		return nil, nil, nil, nil, &gen.Error{Code: 500, Message: err.Error()}
+	}
+
+	var puzzles []Puzzle
+	err = d.db.Select(&puzzles, "SELECT * FROM puzzles WHERE order_info_id = $1", order.Id)
+	if err != nil {
+		return nil, nil, nil, nil, &gen.Error{Code: 500, Message: err.Error()}
+	}
+
+	return &order, &payment, &shipping, &puzzles, nil
 }
 
-func (d *SQLDal) CreateOrderInfo(order OrderInfo, payment PaymentInfo, shipping ShippingInfo, puzzles []Puzzle) error {
+func (d *SQLDal) CreateOrder(order OrderInfo, payment PaymentInfo, shipping ShippingInfo, puzzles []Puzzle) *gen.Error {
 	tx, err := d.db.Beginx()
 	if err != nil {
-		return err
+		return &gen.Error{Code: 500, Message: err.Error()}
 	}
 
 	_, err = tx.NamedExec("INSERT INTO payment_info (id, card_number, expiration, cvv, area_code) VALUES (:id, :card_number, :expiration, :cvv, :area_code)", payment)
 	if err != nil {
 		tx.Rollback()
-		return err
+		return &gen.Error{Code: 500, Message: err.Error()}
 	}
 
 	_, err = tx.NamedExec("INSERT INTO shipping_info (id, name, address, area_code, city, state, country) VALUES (:id, :name, :address, :area_code, :city, :state, :country)", shipping)
 	if err != nil {
 		tx.Rollback()
-		return err
+		return &gen.Error{Code: 500, Message: err.Error()}
 	}
 
 	_, err = tx.NamedExec("INSERT INTO order_info (id, name, shipping_info_id, payment_info_id) VALUES (:id, :name, :shipping_info_id, :payment_info_id)", order)
 	if err != nil {
 		tx.Rollback()
-		return err
+		return &gen.Error{Code: 500, Message: err.Error()}
 	}
 
-	_, err = tx.NamedExec("Insert into puzzles (id, order_info_id, description, price, puzzle_type) VALUES (:id, :order_info_id, :description, :price, :puzzle_type)", puzzles)
+	_, err = tx.NamedExec("Insert into puzzles (id, order_info_id, name, description, price, puzzle_type) VALUES (:id, :order_info_id, :name, :description, :price, :puzzle_type)", puzzles)
 	if err != nil {
 		tx.Rollback()
-		return err
+		return &gen.Error{Code: 500, Message: err.Error()}
 	}
 
-	return tx.Commit()
+	err = tx.Commit()
+	if err != nil {
+		return &gen.Error{Code: 500, Message: err.Error()}
+	}
+
+	return nil
 }

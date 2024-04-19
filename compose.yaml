@@ -3,6 +3,26 @@ version: "3.8"
 name: puzzles
 
 services:
+  consul:
+    image: hashicorp/consul:latest
+    container_name: consul
+    ports:
+      - "8500:8500"
+    networks:
+      - puzzlenet
+    volumes:
+      - ./consul/consul.json:/consul/config/consul.json
+  traefik:
+    image: traefik:v2.5
+    container_name: traefik
+    ports:
+      - "80:80"
+      - "8080:8080"
+    networks:
+      - puzzlenet
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik/traefik.toml:/etc/traefik/traefik.toml
   mongo:
     image: mongo:7.0.8
     container_name: mongo
@@ -15,13 +35,16 @@ services:
     container_name: catalog
     environment:
       - ENV=prod
-    ports:
-      - "8080:8080"
     image: puzzles-catalog
     depends_on:
       - mongo
     networks:
       - puzzlenet
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.catalog.rule=PathPrefix(`/catalog`)"
+      - "traefik.http.routers.catalog.service=catalog"
+      - "traefik.http.services.catalog.loadbalancer.server.port=8080"
   redis:
     image: redis:7.2.4
     container_name: redis

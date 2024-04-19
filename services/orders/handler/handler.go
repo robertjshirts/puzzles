@@ -24,19 +24,19 @@ func (h *OrderHandler) CreateNewOrder(c *gin.Context) {
 		return
 	}
 
-	orderInfo, shippingInfo, paymentInfo, puzzles := dal.ToDALModels(&orderJSON)
-	if orderInfo == nil || shippingInfo == nil || paymentInfo == nil || puzzles == nil {
-		c.JSON(400, gen.Error{Code: 400, Message: "invalid request"})
+	orderInfo, shippingInfo, paymentInfo, puzzles, genErr := dal.ToDALModels(&orderJSON)
+	if genErr != nil {
+		c.JSON(400, genErr)
 		return
 	}
 
-	err := h.db.CreateOrderInfo(*orderInfo, *paymentInfo, *shippingInfo, *puzzles)
-	if err != nil {
-		c.JSON(500, gen.Error{Code: 500, Message: err.Error()})
+	genErr = h.db.CreateOrder(*orderInfo, *paymentInfo, *shippingInfo, *puzzles)
+	if genErr != nil {
+		c.JSON(500, genErr)
 		return
 	}
 
-	apiOrderModel := dal.ToApiModel(*orderInfo, *shippingInfo, *paymentInfo, *puzzles)
+	apiOrderModel := dal.ToApiModel(*orderInfo, *paymentInfo, *shippingInfo, *puzzles)
 	if apiOrderModel == nil {
 		c.JSON(500, gen.Error{Code: 500, Message: "There was an issue converting from DAL models to API Models"})
 		return
@@ -50,5 +50,12 @@ func (h *OrderHandler) DeleteOrder(c *gin.Context, id string) {
 }
 
 func (h *OrderHandler) GetOrder(c *gin.Context, id string) {
-	c.JSON(200, &gen.OrderInfo{})
+	orderInfo, payment, shipping, puzzles, genErr := h.db.GetOrder(id)
+	if genErr != nil {
+		c.JSON(500, genErr)
+		return
+	}
+
+	apiOrderModel := dal.ToApiModel(*orderInfo, *payment, *shipping, *puzzles)
+	c.JSON(200, *apiOrderModel)
 }

@@ -9,6 +9,7 @@ import (
 type Puzzle struct {
 	Id          string         `db:"id"`
 	OrderInfoId string         `db:"order_info_id"`
+	Name        string         `db:"name"`
 	Description string         `db:"description"`
 	Price       float64        `db:"price"`
 	Type        gen.PuzzleType `db:"puzzle_type"`
@@ -40,9 +41,9 @@ type OrderInfo struct {
 	PaymentInfoId  string          `db:"payment_info_id"`
 }
 
-func ToDALModels(order *gen.NewOrderInfo) (*OrderInfo, *ShippingInfo, *PaymentInfo, *[]Puzzle) {
+func ToDALModels(order *gen.NewOrderInfo) (*OrderInfo, *ShippingInfo, *PaymentInfo, *[]Puzzle, *gen.Error) {
 	if order == nil {
-		return nil, nil, nil, nil
+		return nil, nil, nil, nil, &gen.Error{Code: 400, Message: "invalid request"}
 	}
 
 	orderId := uuid.New().String()
@@ -54,6 +55,7 @@ func ToDALModels(order *gen.NewOrderInfo) (*OrderInfo, *ShippingInfo, *PaymentIn
 		puzzles = append(puzzles, Puzzle{
 			Id:          item.Id,
 			OrderInfoId: orderId,
+			Name:        item.Name,
 			Description: item.Description,
 			Price:       item.Price,
 			Type:        item.Type,
@@ -63,7 +65,7 @@ func ToDALModels(order *gen.NewOrderInfo) (*OrderInfo, *ShippingInfo, *PaymentIn
 	return &OrderInfo{
 			Id:             orderId,
 			Name:           order.Name,
-			Status:         gen.OrderStatus("placed"),
+			Status:         "placed",
 			ShippingInfoId: shippingId,
 			PaymentInfoId:  paymentId,
 		}, &ShippingInfo{
@@ -81,14 +83,15 @@ func ToDALModels(order *gen.NewOrderInfo) (*OrderInfo, *ShippingInfo, *PaymentIn
 			Cvv:        order.PaymentInfo.Cvv,
 			AreaCode:   order.PaymentInfo.AreaCode,
 		},
-		&puzzles
+		&puzzles, nil
 }
 
-func ToApiModel(order OrderInfo, shipping ShippingInfo, payment PaymentInfo, puzzles []Puzzle) *gen.OrderInfo {
+func ToApiModel(order OrderInfo, payment PaymentInfo, shipping ShippingInfo, puzzles []Puzzle) *gen.OrderInfo {
 	var items []gen.Puzzle
 	for _, item := range puzzles {
 		items = append(items, gen.Puzzle{
 			Id:          item.Id,
+			Name:        item.Name,
 			Description: item.Description,
 			Price:       item.Price,
 			Type:        item.Type,
@@ -98,7 +101,7 @@ func ToApiModel(order OrderInfo, shipping ShippingInfo, payment PaymentInfo, puz
 	return &gen.OrderInfo{
 		Id:     order.Id,
 		Name:   order.Name,
-		Status: order.Status,
+		Status: gen.OrderStatus(order.Status),
 		Items:  items,
 		ShippingInfo: gen.ShippingInfo{
 			Name:     shipping.Name,

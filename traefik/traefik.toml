@@ -1,0 +1,11 @@
+[entryPoints]
+[entryPoints.web]
+address = ":80"
+[providers]
+[providers.consul]
+endpoints = ["consul:8500"]
+
+[api]
+dashboard = true
+insecure = true
+debug = true
