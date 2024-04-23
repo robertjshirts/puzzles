@@ -7,3 +7,11 @@ user = "puzzles"
 password = "puzzles"
 dbname = "puzzles"
 timeout = "15s"
+
+[service]
+name = "orders"
+address = "orders"
+path = "/order"
+
+[consul]
+address = "consul:8500"

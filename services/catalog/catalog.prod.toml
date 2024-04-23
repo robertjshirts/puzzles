@@ -6,4 +6,8 @@ db = "catalog"
 
 [service]
 name = "catalog"
-host = "catalog"
+address = "catalog"
+path = "/catalog"
+
+[consul]
+address = "consul:8500"

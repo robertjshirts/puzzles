@@ -45,6 +45,11 @@ func main() {
 		viper.GetDuration("redis.duration"),
 	)
 
+	if env == "prod" {
+		id := RegisterService()
+		defer DeregisterService(id)
+	}
+
 	// Create handler
 	handler := handler.NewBasketHandler(
 		db,

@@ -32,6 +32,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Register service
+	if env == "prod" {
+		id := RegisterService()
+		defer DeregisterService(id)
+	}
+
 	// Connect to postgres
 	fmt.Printf("Connecting to postgres with: host=%s port=%d user=%s dbname=%s sslmode=disable\n", viper.GetString("postgres.host"), viper.GetInt("postgres.port"), viper.GetString("postgres.user"), viper.GetString("postgres.dbname"))
 	db, err := dal.NewSQLDal(

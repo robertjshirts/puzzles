@@ -32,6 +32,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Connect to consul
+	if env == "prod" {
+		id := RegisterService()
+		defer DeregisterService(id)
+	}
+
 	// Connect to mongo
 	fmt.Printf("conn: %s\n", viper.GetString("mongo.uri"))
 	db := dal.NewMongoDAL(

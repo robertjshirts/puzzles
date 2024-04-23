@@ -5,3 +5,11 @@ host = "redis"
 password = ""
 port = 6379
 duration = "30m"
+
+[service]
+name = "basket"
+address = "basket"
+path = "/basket"
+
+[consul]
+address = "consul:8500"

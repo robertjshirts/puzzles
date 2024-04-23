@@ -17,6 +17,10 @@ func NewOrderHandler(db *dal.SQLDal) *OrderHandler {
 	}
 }
 
+func (h *OrderHandler) CheckHealth(c *gin.Context) {
+	c.Status(200)
+}
+
 func (h *OrderHandler) CreateNewOrder(c *gin.Context) {
 	var orderJSON gen.NewOrderInfo
 	if err := c.BindJSON(&orderJSON); err != nil {

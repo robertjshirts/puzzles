@@ -5,7 +5,20 @@ info:
   title: "Puzzle Cart Service"
 
 paths:
-  /order:
+  /health:
+    get:
+      summary: "Check the health of the service"
+      operationId: "checkHealth"
+      responses:
+        "200":
+          description: "The service is healthy"
+        default:
+          description: "An error occurred"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /orders:
     post:
       summary: "Place a new order"
       operationId: "createNewOrder"
@@ -28,7 +41,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /order/{id}:
+  /orders/{id}:
     get:
       summary: "Get order details by ID"
       operationId: "getOrder"
