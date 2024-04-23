@@ -19,17 +19,20 @@ type RedisDal struct {
 }
 
 func NewRedisDal(ctx context.Context, host string, port string, password string, expiration time.Duration) *RedisDal {
+	// Initialize Redis client
 	client := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", host, port),
 		Password: password,
 		DB:       0,
 	})
 
+	// Ping Redis
 	_, err := client.Ping(ctx).Result()
 	if err != nil {
 		log.Fatalf("Failed to connect to Redis: %v", err)
 	}
 
+	// Return RedisDal
 	return &RedisDal{
 		client:     client,
 		expiration: expiration,

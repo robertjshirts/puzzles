@@ -1,4 +1,4 @@
-package api
+package handler
 
 import (
 	"github.com/gin-gonic/gin"
@@ -13,6 +13,10 @@ type CatalogHandler struct {
 
 func NewCatalogHandler(db *dal.MongoDAL) *CatalogHandler {
 	return &CatalogHandler{db: db}
+}
+
+func (h *CatalogHandler) CheckHealth(c *gin.Context) {
+	c.Status(200)
 }
 
 func (h *CatalogHandler) GetPuzzles(c *gin.Context) {

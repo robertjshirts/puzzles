@@ -1,4 +1,4 @@
-port = 8082
+port = 8080
 
 [postgres]
 host = "postgres"

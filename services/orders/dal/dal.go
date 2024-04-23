@@ -24,14 +24,6 @@ EXCEPTION
 	WHEN duplicate_object THEN null;
 END $$;
 
-DO $$ BEGIN
-	CREATE TYPE order_enum AS ENUM ('cancelled', 'placed');
-EXCEPTION
-	WHEN duplicate_object THEN null;
-END $$;
-
-DROP TABLE IF EXISTS puzzles CASCADE;
-
 CREATE TABLE IF NOT EXISTS shipping_info (
 	id TEXT PRIMARY KEY,
 	name TEXT NOT NULL,
@@ -53,10 +45,11 @@ CREATE TABLE IF NOT EXISTS payment_info (
 CREATE TABLE IF NOT EXISTS order_info (
 	id TEXT PRIMARY KEY,
 	name TEXT NOT NULL,
+	status TEXT NOT NULL,
 	shipping_info_id TEXT NOT NULL,
 	payment_info_id TEXT NOT NULL,
-	FOREIGN KEY (shipping_info_id) REFERENCES shipping_info(id),
-	FOREIGN KEY (payment_info_id) REFERENCES payment_info(id)
+	FOREIGN KEY (shipping_info_id) REFERENCES shipping_info(id) ON DELETE CASCADE,
+	FOREIGN KEY (payment_info_id) REFERENCES payment_info(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS puzzles (
@@ -66,31 +59,27 @@ CREATE TABLE IF NOT EXISTS puzzles (
 	description TEXT NOT NULL,
 	price DECIMAL NOT NULL,
 	puzzle_type puzzle_enum NOT NULL,
-	FOREIGN KEY (order_info_id) REFERENCES order_info(id)
+	FOREIGN KEY (order_info_id) REFERENCES order_info(id) ON DELETE CASCADE
 );
 `
 
 func NewSQLDal(host string, port int, user string, password string, dbname string, timeout time.Duration) (*SQLDal, error) {
+	// Initialize database connection
 	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
-	fmt.Println(dsn)
-	db, err := sqlx.Connect("postgres", dsn)
-	if err != nil {
-		return nil, err
-	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
-
-	err = db.PingContext(ctx)
+	db, err := sqlx.ConnectContext(ctx, "postgres", dsn)
 	if err != nil {
 		return nil, err
 	}
 
+	// Create schema
 	result := db.MustExec(schema)
 	if _, err := result.RowsAffected(); err != nil {
 		return nil, err
 	}
 
+	// Return DAL
 	return &SQLDal{
 		db: db,
 	}, nil
@@ -100,11 +89,34 @@ func (d *SQLDal) Close() error {
 	return d.db.Close()
 }
 
+func (d *SQLDal) DeleteOrder(id string) *gen.Error {
+	tx, err := d.db.Beginx()
+	if err != nil {
+		return &gen.Error{Code: 500, Message: err.Error()}
+	}
+
+	_, err = tx.Exec("DELETE FROM order_info WHERE id = $1", id)
+	if err == sql.ErrNoRows {
+		tx.Rollback()
+		return &gen.Error{Code: 404, Message: "Order not found"}
+	} else if err != nil {
+		tx.Rollback()
+		return &gen.Error{Code: 500, Message: err.Error()}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return &gen.Error{Code: 500, Message: err.Error()}
+	}
+
+	return nil
+}
+
 func (d *SQLDal) GetOrder(id string) (*OrderInfo, *PaymentInfo, *ShippingInfo, *[]Puzzle, *gen.Error) {
 	var order OrderInfo
 	err := d.db.Get(&order, "SELECT * FROM order_info WHERE id = $1", id)
 	if err == sql.ErrNoRows {
-		return nil, nil, nil, nil, &gen.Error{Code: 404, Message: "order not found"}
+		return nil, nil, nil, nil, &gen.Error{Code: 404, Message: "Order not found"}
 	} else if err != nil {
 		return nil, nil, nil, nil, &gen.Error{Code: 500, Message: err.Error()}
 	}
@@ -148,7 +160,7 @@ func (d *SQLDal) CreateOrder(order OrderInfo, payment PaymentInfo, shipping Ship
 		return &gen.Error{Code: 500, Message: err.Error()}
 	}
 
-	_, err = tx.NamedExec("INSERT INTO order_info (id, name, shipping_info_id, payment_info_id) VALUES (:id, :name, :shipping_info_id, :payment_info_id)", order)
+	_, err = tx.NamedExec("INSERT INTO order_info (id, name, status, shipping_info_id, payment_info_id) VALUES (:id, :name, :status, :shipping_info_id, :payment_info_id)", order)
 	if err != nil {
 		tx.Rollback()
 		return &gen.Error{Code: 500, Message: err.Error()}

@@ -17,20 +17,23 @@ import (
 )
 
 func main() {
+	// Determine environment
 	env := os.Getenv("ENV")
 	if env == "" {
 		env = "dev"
 	}
 
+	// Load configuration
 	viper.SetConfigFile(fmt.Sprintf("orders.%s.toml", env))
 	viper.SetConfigType("toml")
 	viper.SetEnvPrefix("puzzles")
 	viper.AutomaticEnv()
-
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatal(err)
 	}
 
+	// Connect to postgres
+	fmt.Printf("Connecting to postgres with: host=%s port=%d user=%s dbname=%s sslmode=disable\n", viper.GetString("postgres.host"), viper.GetInt("postgres.port"), viper.GetString("postgres.user"), viper.GetString("postgres.dbname"))
 	db, err := dal.NewSQLDal(
 		viper.GetString("postgres.host"),
 		viper.GetInt("postgres.port"),
@@ -42,18 +45,20 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer db.Close()
 
+	// Create handler
 	handler := handler.NewOrderHandler(db)
-
 	swagger, err := gen.GetSwagger()
 	if err != nil {
 		panic(err)
 	}
 
+	// Create router
 	router := gin.Default()
-
 	router.Use(middleware.OapiRequestValidator(swagger))
 	gen.RegisterHandlers(router, handler)
 
+	// Start server
 	http.ListenAndServe(fmt.Sprintf(":%d", viper.GetInt("port")), router)
 }

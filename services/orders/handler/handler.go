@@ -26,13 +26,13 @@ func (h *OrderHandler) CreateNewOrder(c *gin.Context) {
 
 	orderInfo, shippingInfo, paymentInfo, puzzles, genErr := dal.ToDALModels(&orderJSON)
 	if genErr != nil {
-		c.JSON(400, genErr)
+		c.JSON(genErr.Code, genErr)
 		return
 	}
 
 	genErr = h.db.CreateOrder(*orderInfo, *paymentInfo, *shippingInfo, *puzzles)
 	if genErr != nil {
-		c.JSON(500, genErr)
+		c.JSON(genErr.Code, genErr)
 		return
 	}
 
@@ -46,13 +46,18 @@ func (h *OrderHandler) CreateNewOrder(c *gin.Context) {
 }
 
 func (h *OrderHandler) DeleteOrder(c *gin.Context, id string) {
+	genErr := h.db.DeleteOrder(id)
+	if genErr != nil {
+		c.JSON(genErr.Code, genErr)
+		return
+	}
 	c.Status(204)
 }
 
 func (h *OrderHandler) GetOrder(c *gin.Context, id string) {
 	orderInfo, payment, shipping, puzzles, genErr := h.db.GetOrder(id)
 	if genErr != nil {
-		c.JSON(500, genErr)
+		c.JSON(genErr.Code, genErr)
 		return
 	}
 

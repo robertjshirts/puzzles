@@ -1,6 +1,8 @@
 package dal
 
 import (
+	"fmt"
+
 	"github.com/google/uuid"
 
 	"github.com/puzzles/services/orders/gen"
@@ -34,11 +36,11 @@ type PaymentInfo struct {
 }
 
 type OrderInfo struct {
-	Id             string          `db:"id"`
-	Name           string          `db:"name"`
-	Status         gen.OrderStatus `db:"status"`
-	ShippingInfoId string          `db:"shipping_info_id"`
-	PaymentInfoId  string          `db:"payment_info_id"`
+	Id             string `db:"id"`
+	Name           string `db:"name"`
+	Status         string `db:"status"`
+	ShippingInfoId string `db:"shipping_info_id"`
+	PaymentInfoId  string `db:"payment_info_id"`
 }
 
 func ToDALModels(order *gen.NewOrderInfo) (*OrderInfo, *ShippingInfo, *PaymentInfo, *[]Puzzle, *gen.Error) {
@@ -97,6 +99,8 @@ func ToApiModel(order OrderInfo, payment PaymentInfo, shipping ShippingInfo, puz
 			Type:        item.Type,
 		})
 	}
+
+	fmt.Println("order status " + order.Status)
 
 	return &gen.OrderInfo{
 		Id:     order.Id,

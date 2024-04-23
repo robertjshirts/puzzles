@@ -13,9 +13,14 @@ type BasketHandler struct {
 }
 
 func NewBasketHandler(db *dal.RedisDal) *BasketHandler {
+	// Create handler
 	return &BasketHandler{
 		db: db,
 	}
+}
+
+func (h *BasketHandler) CheckHealth(c *gin.Context) {
+	c.Status(200)
 }
 
 func (h *BasketHandler) CreateNewBasket(c *gin.Context) {

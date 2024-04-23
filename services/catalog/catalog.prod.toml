@@ -3,3 +3,7 @@ port = 8080
 [mongo]
 uri = "mongodb://mongo:27017"
 db = "catalog"
+
+[service]
+name = "catalog"
+host = "catalog"
