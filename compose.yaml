@@ -74,6 +74,17 @@ services:
     networks: 
       - puzzlenet
 
+  consumer:
+    build: ./services/consumer
+    image: puzzles-consumer
+    environment:
+      - ENV=prod
+    restart: always
+    depends_on:
+      - rabbitmq
+      - postgres
+    networks:
+      - puzzlenet
 
   catalog:
     build: ./services/catalog
@@ -106,6 +117,7 @@ services:
       replicas: 3
     depends_on:
       - postgres
+      - rabbitmq
     environment:
       - ENV=prod
     restart: always

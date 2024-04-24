@@ -59,6 +59,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	fmt.Println("Queue declared")
+
 	msgs, err := ch.Consume(
 		queue.Name,
 		"",
@@ -72,15 +74,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	go func() {
-		for msg := range msgs {
-			var qm QueueMessage
-			if err := json.Unmarshal(msg.Body, &qm); err != nil {
-				fmt.Printf("Error decoding message: %v", err)
-				continue
-			}
-
-			log.Printf("Received order: %s", qm.OrderID)
+	fmt.Println("Listening for messages...")
+	// Because msgs is a channel, it blocks until a message is received
+	for msg := range msgs {
+		var qm QueueMessage
+		if err := json.Unmarshal(msg.Body, &qm); err != nil {
+			fmt.Printf("Error decoding message: %v", err)
+			continue
 		}
-	}()
+
+		log.Printf("Received order: %s", qm.OrderID)
+	}
+
 }
