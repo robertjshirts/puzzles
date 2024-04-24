@@ -74,8 +74,9 @@ services:
     networks: 
       - puzzlenet
 
-  consumer:
+  shipping:
     build: ./services/consumer
+    container_name: shipping
     image: puzzles-consumer
     environment:
       - ENV=prod

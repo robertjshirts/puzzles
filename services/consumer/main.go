@@ -41,12 +41,14 @@ func main() {
 	}
 	defer conn.Close()
 
+	// Open a channel
 	ch, err := conn.Channel()
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer ch.Close()
 
+	// Declare a queue
 	queue, err := ch.QueueDeclare(
 		viper.GetString("rabbitmq.queue"),
 		false,
@@ -58,9 +60,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	fmt.Println("Queue declared")
 
+	// Get the messages channel
 	msgs, err := ch.Consume(
 		queue.Name,
 		"",
@@ -74,6 +76,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Start listening for messages
 	fmt.Println("Listening for messages...")
 	// Because msgs is a channel, it blocks until a message is received
 	for msg := range msgs {
@@ -83,7 +86,7 @@ func main() {
 			continue
 		}
 
-		log.Printf("Received order: %s", qm.OrderID)
+		fmt.Printf("Shipping order: %s", qm.OrderID)
 	}
 
 }
