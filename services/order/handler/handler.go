@@ -1,20 +1,62 @@
 package handler
 
 import (
+	"encoding/json"
+	"fmt"
+	"log"
+
 	"github.com/puzzles/services/order/dal"
 	"github.com/puzzles/services/order/gen"
 
 	"github.com/gin-gonic/gin"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type OrderHandler struct {
-	db *dal.SQLDal
+	db    *dal.SQLDal
+	ch    *amqp.Channel
+	conn  *amqp.Connection
+	queue string
 }
 
-func NewOrderHandler(db *dal.SQLDal) *OrderHandler {
-	return &OrderHandler{
-		db: db,
+type QueueMessage struct {
+	OrderID string `json:"order_id"`
+}
+
+func NewOrderHandler(user string, pass string, host string, port int, db *dal.SQLDal) *OrderHandler {
+	conn, err := amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%d/", user, pass, host, port))
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	ch, err := conn.Channel()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	queue, err := ch.QueueDeclare(
+		"order_queue",
+		false,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return &OrderHandler{
+		conn:  conn,
+		ch:    ch,
+		queue: queue.Name,
+		db:    db,
+	}
+}
+
+func (h *OrderHandler) Close() {
+	h.ch.Close()
+	h.conn.Close()
 }
 
 func (h *OrderHandler) CheckHealth(c *gin.Context) {
@@ -37,6 +79,21 @@ func (h *OrderHandler) CreateNewOrder(c *gin.Context) {
 	genErr = h.db.CreateOrder(*orderInfo, *paymentInfo, *shippingInfo, *puzzles)
 	if genErr != nil {
 		c.JSON(genErr.Code, genErr)
+		return
+	}
+
+	body, err := json.Marshal(QueueMessage{OrderID: orderInfo.Id})
+	if err != nil {
+		c.JSON(500, gen.Error{Code: 500, Message: "There was an issue marshalling the rabbitmq message"})
+		return
+	}
+
+	err = h.ch.PublishWithContext(c, "", h.queue, false, false, amqp.Publishing{
+		ContentType: "application/json",
+		Body:        body,
+	})
+	if err != nil {
+		c.JSON(500, gen.Error{Code: 500, Message: "There was an issue publishing the message to the queue"})
 		return
 	}
 

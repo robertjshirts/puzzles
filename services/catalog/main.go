@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/spf13/viper"
 
@@ -31,6 +32,8 @@ func main() {
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatal(err)
 	}
+
+	time.Sleep(10 * time.Second)
 
 	// Connect to consul
 	if env == "prod" {

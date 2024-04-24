@@ -34,6 +34,14 @@ func main() {
 		log.Fatal(err)
 	}
 
+	time.Sleep(10 * time.Second)
+
+	// Register service
+	if env == "prod" {
+		id := RegisterService()
+		defer DeregisterService(id)
+	}
+
 	// Connect to redis
 	fmt.Printf("Connecting to redis on: %s", viper.GetString("redis.host"))
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -44,11 +52,6 @@ func main() {
 		viper.GetString("redis.password"),
 		viper.GetDuration("redis.duration"),
 	)
-
-	if env == "prod" {
-		id := RegisterService()
-		defer DeregisterService(id)
-	}
 
 	// Create handler
 	handler := handler.NewBasketHandler(

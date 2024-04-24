@@ -3,6 +3,14 @@ version: "3.8"
 name: puzzles
 
 services:
+  rabbitmq:
+    image: rabbitmq:3.9.7-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - puzzlenet
   traefik:
     image: traefik:v2.5
     container_name: traefik

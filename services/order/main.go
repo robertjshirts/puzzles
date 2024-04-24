@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	middleware "github.com/oapi-codegen/gin-middleware"
 	"github.com/spf13/viper"
@@ -32,6 +33,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	time.Sleep(10 * time.Second)
+
 	// Register service
 	if env == "prod" {
 		id := RegisterService()
@@ -54,7 +57,12 @@ func main() {
 	defer db.Close()
 
 	// Create handler
-	handler := handler.NewOrderHandler(db)
+	handler := handler.NewOrderHandler(
+		viper.GetString("rabbitmq.user"),
+		viper.GetString("rabbitmq.pass"),
+		viper.GetString("rabbitmq.host"),
+		viper.GetInt("rabbitmq.port"),
+		db)
 	swagger, err := gen.GetSwagger()
 	if err != nil {
 		panic(err)
