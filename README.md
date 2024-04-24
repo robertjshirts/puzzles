@@ -1,3 +1,3 @@
 # PUZZLES
 
-Sometimes services will fail to start because they try to register too quickly for consul, add a context or a retry thing
+To run in a containerized environment, run docker compose up (or docker-compose up), and give it a moment to build all the services. You can see the dashboard for consul (service registry) at localhost:8500, the dashboard for traefik (api gateway) at localhost:8080, and the dashboard for rabbitmq at localhost:15672 (user and password are "guest"). Send requests according to the *servicename*-api.yaml in each of the service directories (./service/catalog/catalog-api.yaml, ./service/basket/basket-api.yaml, ./service/order/order-api.yaml).

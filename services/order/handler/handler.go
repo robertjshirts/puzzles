@@ -23,7 +23,7 @@ type QueueMessage struct {
 	OrderID string `json:"order_id"`
 }
 
-func NewOrderHandler(user string, pass string, host string, port int, db *dal.SQLDal) *OrderHandler {
+func NewOrderHandler(user string, pass string, host string, port int, queueName string, db *dal.SQLDal) *OrderHandler {
 	conn, err := amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%d/", user, pass, host, port))
 	if err != nil {
 		log.Fatal(err)
@@ -35,7 +35,7 @@ func NewOrderHandler(user string, pass string, host string, port int, db *dal.SQ
 	}
 
 	queue, err := ch.QueueDeclare(
-		"order_queue",
+		queueName,
 		false,
 		false,
 		false,

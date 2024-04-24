@@ -1,0 +1,6 @@
+[rabbitmq]
+user = "guest"
+pass = "guest"
+host = "rabbitmq"
+port = 5672
+queue = "order_queue"

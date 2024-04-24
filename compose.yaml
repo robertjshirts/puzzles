@@ -1,8 +1,40 @@
-version: "3.8"
+version: '3'
 
 name: puzzles
 
 services:
+  traefik:
+    image: traefik:v2.5
+    container_name: traefik
+    command:
+      - "--api.insecure=true"
+      - '--providers.consulcatalog=true'
+      - '--providers.consulcatalog.prefix=traefik'
+      - '--providers.consulcatalog.endpoint.address=consul:8500'
+      - '--serversTransport.insecureSkipVerify=true'
+      - '--entryPoints.web.address=:80'
+      - '--log.level=DEBUG'
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+    networks:
+      - puzzlenet
+
+  consul:
+    image: hashicorp/consul:1.18
+    container_name: consul
+    labels:
+      - "traefik.enable=true"
+      - "traefik.consulcatalog.connect=true"
+    command: agent -server -bootstrap -ui -client=0.0.0.0
+    ports:
+      - "8500:8500"
+    networks:
+      - puzzlenet
+
   rabbitmq:
     image: rabbitmq:3.9.7-management
     container_name: rabbitmq
@@ -11,38 +43,14 @@ services:
       - "15672:15672"
     networks:
       - puzzlenet
-  traefik:
-    image: traefik:v2.5
-    container_name: traefik
-    ports:
-      - "80:80"
-      - "8080:8080"
-    volumes:
-      - ./traefik/traefik.yml:/etc/traefik/traefik.yml
-    networks:
-      - puzzlenet
-  consul:
-    image: hashicorp/consul:1.18
-    container_name: consul
-    ports:
-      - "8500:8500"
-    networks:
-      - puzzlenet
+
   mongo:
     image: mongo:7.0.8
     container_name: mongo
+    ports:
+      - "27017:27017"
     volumes:
       - /dev/volumes/puzzles/mongo:/data/db
-    networks:
-      - puzzlenet
-  catalog:
-    build: ./services/catalog
-    container_name: catalog
-    depends_on:
-      - mongo
-    environment:
-      - ENV=prod
-    restart: always
     networks:
       - puzzlenet
   redis:
@@ -52,20 +60,9 @@ services:
       - "6379:6379"
     networks:
       - puzzlenet
-  basket:
-    build: ./services/basket
-    container_name: basket
-    depends_on:
-      - redis
-    environment:
-      - ENV=prod
-    restart: always
-    networks:
-      - puzzlenet
   postgres:
-    image: postgres:16.2
+    image: postgres:14.0
     container_name: postgres
-    restart: always
     shm_size: 128mb
     ports:
       - "5432:5432"
@@ -73,11 +70,40 @@ services:
       - POSTGRES_USER=puzzles
       - POSTGRES_PASSWORD=puzzles
       - POSTGRES_DB=puzzles
+    restart: always
     networks: 
+      - puzzlenet
+
+
+  catalog:
+    build: ./services/catalog
+    image: puzzles-catalog
+    deploy:
+      replicas: 3
+    depends_on:
+      - mongo
+    environment:
+      - ENV=prod
+    restart: always
+    networks:
+      - puzzlenet
+  basket:
+    build: ./services/basket
+    image: puzzles-basket
+    deploy:
+      replicas: 3  
+    depends_on:
+      - redis
+    environment:
+      - ENV=prod
+    restart: always
+    networks:
       - puzzlenet
   order:
     build: ./services/order
-    container_name: order
+    image: puzzles-order
+    deploy:
+      replicas: 3
     depends_on:
       - postgres
     environment:

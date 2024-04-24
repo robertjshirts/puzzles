@@ -62,6 +62,7 @@ func main() {
 		viper.GetString("rabbitmq.pass"),
 		viper.GetString("rabbitmq.host"),
 		viper.GetInt("rabbitmq.port"),
+		viper.GetString("rabbitmq.queue"),
 		db)
 	swagger, err := gen.GetSwagger()
 	if err != nil {
