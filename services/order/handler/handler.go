@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"github.com/puzzles/services/orders/dal"
-	"github.com/puzzles/services/orders/gen"
+	"github.com/puzzles/services/order/dal"
+	"github.com/puzzles/services/order/gen"
 
 	"github.com/gin-gonic/gin"
 )

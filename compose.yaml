@@ -3,6 +3,16 @@ version: "3.8"
 name: puzzles
 
 services:
+  traefik:
+    image: traefik:v2.5
+    container_name: traefik
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml
+    networks:
+      - puzzlenet
   consul:
     image: hashicorp/consul:1.18
     container_name: consul
@@ -20,13 +30,11 @@ services:
   catalog:
     build: ./services/catalog
     container_name: catalog
-    environment:
-      - ENV=prod
-    ports:
-      - "8080:8080"
-    image: puzzles-catalog
     depends_on:
       - mongo
+    environment:
+      - ENV=prod
+    restart: always
     networks:
       - puzzlenet
   redis:
@@ -39,13 +47,11 @@ services:
   basket:
     build: ./services/basket
     container_name: basket
-    environment:
-      - ENV=prod
-    ports:
-      - "8081:8080"
-    image: puzzles-basket
     depends_on:
       - redis
+    environment:
+      - ENV=prod
+    restart: always
     networks:
       - puzzlenet
   postgres:
@@ -61,16 +67,14 @@ services:
       - POSTGRES_DB=puzzles
     networks: 
       - puzzlenet
-  orders:
-    build: ./services/orders
-    container_name: orders
-    environment:
-      - ENV=prod
-    ports:
-      - "8082:8080"
-    image: puzzles-orders
+  order:
+    build: ./services/order
+    container_name: order
     depends_on:
       - postgres
+    environment:
+      - ENV=prod
+    restart: always
     networks:
       - puzzlenet
 

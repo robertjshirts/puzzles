@@ -26,7 +26,7 @@ WORKDIR /app
 COPY --from=builder /app/myapp /app/myapp
 
 # Copy the configuration file from the build context to the same directory as the binary.
-COPY ./orders.prod.toml /app/orders.prod.toml
+COPY ./order.prod.toml /app/order.prod.toml
 
 # Command to run the executable.
 CMD ["./myapp"]

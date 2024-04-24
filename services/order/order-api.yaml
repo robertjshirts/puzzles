@@ -18,7 +18,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /orders:
+  /order:
     post:
       summary: "Place a new order"
       operationId: "createNewOrder"
@@ -41,7 +41,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /orders/{id}:
+  /order/{id}:
     get:
       summary: "Get order details by ID"
       operationId: "getOrder"

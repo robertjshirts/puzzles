@@ -11,9 +11,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/puzzles/services/orders/dal"
-	"github.com/puzzles/services/orders/gen"
-	"github.com/puzzles/services/orders/handler"
+	"github.com/puzzles/services/order/dal"
+	"github.com/puzzles/services/order/gen"
+	"github.com/puzzles/services/order/handler"
 )
 
 func main() {
@@ -24,7 +24,7 @@ func main() {
 	}
 
 	// Load configuration
-	viper.SetConfigFile(fmt.Sprintf("orders.%s.toml", env))
+	viper.SetConfigFile(fmt.Sprintf("order.%s.toml", env))
 	viper.SetConfigType("toml")
 	viper.SetEnvPrefix("puzzles")
 	viper.AutomaticEnv()

@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/puzzles/services/orders/gen"
+	"github.com/puzzles/services/order/gen"
 )
 
 type Puzzle struct {

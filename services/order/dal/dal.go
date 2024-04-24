@@ -10,7 +10,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/puzzles/services/orders/gen"
+	"github.com/puzzles/services/order/gen"
 )
 
 type SQLDal struct {

@@ -9,8 +9,8 @@ dbname = "puzzles"
 timeout = "15s"
 
 [service]
-name = "orders"
-address = "orders"
+name = "order"
+address = "order"
 path = "/order"
 
 [consul]
