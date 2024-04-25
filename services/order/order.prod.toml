@@ -1,4 +1,5 @@
 port = 8080
+startup_delay = "20s"
 
 [postgres]
 host = "postgres"

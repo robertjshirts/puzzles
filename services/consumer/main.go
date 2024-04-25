@@ -31,7 +31,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	time.Sleep(10 * time.Second)
+	time.Sleep(viper.GetDuration("startup_delay"))
 
 	// Connect to rabbitmq
 	fmt.Printf("Connecting to rabbitmq with: %s:%s@%s:%d\n", viper.GetString("rabbitmq.user"), viper.GetString("rabbitmq.pass"), viper.GetString("rabbitmq.host"), viper.GetInt("rabbitmq.port"))
@@ -86,7 +86,7 @@ func main() {
 			continue
 		}
 
-		fmt.Printf("Shipping order: %s", qm.OrderID)
+		log.Printf("Shipping order: %s", qm.OrderID)
 	}
 
 }

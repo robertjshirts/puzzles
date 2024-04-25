@@ -34,7 +34,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	time.Sleep(10 * time.Second)
+	time.Sleep(viper.GetDuration("startup_delay"))
 
 	// Register service
 	if env == "prod" {

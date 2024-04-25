@@ -1,3 +1,5 @@
+startup_delay = "25s"
+
 [rabbitmq]
 user = "guest"
 pass = "guest"

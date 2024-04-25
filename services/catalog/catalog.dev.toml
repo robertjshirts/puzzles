@@ -1,4 +1,5 @@
 port = 8080
+startup_delay = "30s"
 
 [mongo]
 uri = "mongodb://localhost:27017"

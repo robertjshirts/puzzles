@@ -33,7 +33,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	time.Sleep(10 * time.Second)
+	time.Sleep(viper.GetDuration("startup_delay"))
 
 	// Connect to consul
 	if env == "prod" {

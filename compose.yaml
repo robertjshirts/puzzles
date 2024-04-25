@@ -3,6 +3,7 @@ version: '3'
 name: puzzles
 
 services:
+  #Gateway
   traefik:
     image: traefik:v2.5
     container_name: traefik
@@ -23,6 +24,7 @@ services:
     networks:
       - puzzlenet
 
+  #Service registry/discovery
   consul:
     image: hashicorp/consul:1.18
     container_name: consul
@@ -35,6 +37,7 @@ services:
     networks:
       - puzzlenet
 
+  #Message queue
   rabbitmq:
     image: rabbitmq:3.9.7-management
     container_name: rabbitmq
@@ -44,6 +47,7 @@ services:
     networks:
       - puzzlenet
 
+  #Databases
   mongo:
     image: mongo:7.0.8
     container_name: mongo
@@ -74,6 +78,7 @@ services:
     networks: 
       - puzzlenet
 
+  #Consumer
   shipping:
     build: ./services/consumer
     container_name: shipping
@@ -87,6 +92,7 @@ services:
     networks:
       - puzzlenet
 
+  #API services
   catalog:
     build: ./services/catalog
     image: puzzles-catalog
