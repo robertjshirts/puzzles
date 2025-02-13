@@ -12,7 +12,7 @@ Puzzles is a distributed, simple e-commerce backend written in Golang designed t
 To run the application in a containerized environment, follow these steps:
 1. Clone the repository:
 ```bash
-git clone https://github.com/your-username/Puzzles.git
+git clone https://github.com/robertjshirts/Puzzles.git
 ```
 2. Navigate to the project directory
 ```bash
